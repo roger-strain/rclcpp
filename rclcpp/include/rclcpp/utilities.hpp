@@ -15,9 +15,12 @@
 #ifndef RCLCPP__UTILITIES_HPP_
 #define RCLCPP__UTILITIES_HPP_
 
+#include <algorithm>
 #include <chrono>
 #include <functional>
+#include <iterator>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -26,7 +29,6 @@
 #include "rclcpp/visibility_control.hpp"
 
 #ifdef ANDROID
-#include <sstream>
 
 namespace std
 {
@@ -280,6 +282,27 @@ bool
 sub_will_underflow(const T x, const T y)
 {
   return (y > 0) && (x < (std::numeric_limits<T>::min() + y));
+}
+
+/// Join values in a container turned into strings by a given delimiter
+/**
+ * \param[in] container is a collection of values to be turned into string and joined.
+ * \param[in] delim is a delimiter to join values turned into strings.
+ * \tparam CharT is the string character type.
+ * \tparam ValueT is the container value type.
+ * \tparam AllocatorT is the container allocator type.
+ * \tparam ContainerT is the container template type.
+ * \return joined string
+ */
+template<
+  typename CharT, typename ValueT, typename AllocatorT,
+  template<typename T, class A> class ContainerT>
+std::basic_string<CharT>
+join(const ContainerT<ValueT, AllocatorT> & container, const CharT * delim)
+{
+  std::basic_ostringstream<CharT> s;
+  std::copy(container.begin(), container.end(), std::ostream_iterator<ValueT, CharT>(s, delim));
+  return s.str();
 }
 
 /// Return the given string.
